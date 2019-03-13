@@ -37,7 +37,7 @@ Spaceship = Class{
 
 -- ============================================================================
 
-function startMove(ctx, mainTimer)
+local function startMove(ctx, mainTimer)
   ctx.flagIsMoving = 1
 
   local scm = (ssdef.moveLeapLength * ctx.size)
@@ -56,7 +56,7 @@ end
 
 function Spaceship:processKeyPressed(keyPressed, mainTimer)
   if (sskb.kGo == keyPressed) then
-    log_m.trace("will do move ")
+    -- log_m.trace("will do move ")
     startMove(self, mainTimer)
   elseif (sskb.kLeft == keyPressed) then
     self.angle = self.angle - (math.pi/10)
@@ -109,6 +109,12 @@ function Spaceship:drawSelf()
   if ((self.centerY) > (self.gameAreaHeight - appdef.maxObjectSize/2)) then
     -- log_m.trace("need more draw to down")
     local ymod = self.gameAreaY - self.centerY - (self.gameAreaHeight - self.centerY)
+    drawSpaceShip(self, self.gameAreaX, ymod)
+  end
+
+  if ((self.centerY) < (appdef.maxObjectSize/2)) then
+    -- log_m.trace("need more draw to up")
+    local ymod = self.gameAreaY + self.gameAreaHeight
     drawSpaceShip(self, self.gameAreaX, ymod)
   end
 end
