@@ -5,19 +5,17 @@ defm.getAppDefaults(ds)
 local log_m = require '../thirdparty/log_lua-master/log'
 
 local HumpClass = require "../thirdparty/hump.class"
--- local mainTimer = require "../thirdparty/hump.timer"
-
-require "src/spaceship"
--- local spaceship = Spaceship(80, 520)
 
 require "src/asteroid"
--- local asteroid = Asteroid(480, 120)
+require "src/rocket"
+require "src/spaceship"
 
 -- ===========================================================================
 
 AsteroidsGame = HumpClass{
   spaceship = nil,
   asteroids = {} ,
+  rockets = {} ,
   mainTimer = nil,
   asteroidsUpdateTimeAcc = 0,
 }
@@ -32,8 +30,6 @@ function AsteroidsGame:init()
     self.asteroids[i] = Asteroid(asteroidPositions[i])
     self.asteroids[i]:restartMoving(self.mainTimer)
   end
-
-
 end
 
 -- ===========================================================================
@@ -50,6 +46,9 @@ function AsteroidsGame:drawSelf()
   self.spaceship:drawSelf()
   for i = 1, #self.asteroids do
     self.asteroids[i]:drawSelf()
+  end
+  for i = 1, #self.rockets do
+    self.rockets[i]:drawSelf()
   end
 
   -- draw (restore) large borders
@@ -79,7 +78,14 @@ function AsteroidsGame:drawSelf()
 end
 
 function AsteroidsGame:processKeyPressed(key)
-  self.spaceship:processKeyPressed(key, self.mainTimer)
+  if (key == "escape") then
+    love.event.quit(0)
+  elseif (key == "space") then
+    local newIdx = #self.rockets +1
+    self.rockets[newIdx] = Rocket(self.spaceship, self.mainTimer)
+  else
+    self.spaceship:processKeyPressed(key, self.mainTimer)
+  end
 end
 
 function AsteroidsGame:processUpdate(diffTime)
@@ -91,6 +97,20 @@ function AsteroidsGame:processUpdate(diffTime)
       self.asteroids[i]:restartMoving(self.mainTimer)
       self.asteroidsUpdateTimeAcc = 0
     end
+
+    local newRockets = {}
+    local newRocketsIdx = 1;
+    for i=1,#self.rockets do
+      if (self.rockets[i].active < 0.05) then
+        self.mainTimer.cancel(self.rockets[i].movingTweenHandle)
+        self.rockets[i] = nil
+        log_m.trace("removed rocket #" .. i)
+      else
+        newRockets[newRocketsIdx] = self.rockets[i]
+        newRocketsIdx = newRocketsIdx +1
+      end
+    end
+    self.rockets = newRockets
   end
 end
 
