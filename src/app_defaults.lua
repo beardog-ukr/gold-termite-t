@@ -30,8 +30,8 @@ local function getSpaceshipDefaults(ctx)
 end
 
 local function getAsteroidDefaults(ctx)
-  ctx.mainColor = {0.1,0.4,0.4,1}
-  ctx.secondaryColor = {0.8,0.8,0.8,1}
+  ctx.mainColor = {0.7,0.7,0.3,1}
+  ctx.secondaryColor = {0.5, 0.5, 0.8, 1}
   ctx.speedInterval = 3 -- three seconds to move to new point
   ctx.moveLeapLength = 1 -- after one keypress ship will move this value multiplied to radius
 end
@@ -41,4 +41,5 @@ end
 return {
   getAppDefaults = getAppDefaults,
   getSpaceshipDefaults = getSpaceshipDefaults,
+  getAsteroidDefaults = getAsteroidDefaults,
 }

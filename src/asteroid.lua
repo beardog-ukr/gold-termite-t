@@ -8,7 +8,7 @@ local Class = require "../thirdparty/hump.class"
 
 local asdef_m = require("src/app_defaults")
 local asdef = {}
-asdef_m.getSpaceshipDefaults(asdef)
+asdef_m.getAsteroidDefaults(asdef)
 
 -- ===========================================================================
 
@@ -88,7 +88,7 @@ local function rebalanceCenterCoordinates(ctx)
   end
   if (ctx.centerY > ctx.gameAreaHeight) then
     log_m.trace("rebalanced after south Y")
-    ctx.centerY = ctx.centerY - ctx.gameAreaHeight 
+    ctx.centerY = ctx.centerY - ctx.gameAreaHeight
   end
 end
 
