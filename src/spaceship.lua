@@ -54,7 +54,30 @@ local function startMove(ctx, mainTimer)
   ctx.movingTweenHandle = newTimer
 end
 
+local function rebalanceCenterCoordinates(ctx)
+  if (ctx.centerX < 0) then
+    log_m.trace("spaceship rebalanced after west X")
+    ctx.centerX = ctx.gameAreaWidth + ctx.centerX
+  end
+  if (ctx.centerY < 0) then
+    log_m.trace("spaceship rebalanced after north Y")
+    ctx.centerY = ctx.gameAreaHeight + ctx.centerY
+  end
+
+  if (ctx.centerX > ctx.gameAreaWidth) then
+    log_m.trace("spaceship rebalanced after east X")
+    ctx.centerX = ctx.centerX - ctx.gameAreaWidth
+  end
+  if (ctx.centerY > ctx.gameAreaHeight) then
+    log_m.trace("spaceship rebalanced after south Y")
+    ctx.centerY = ctx.centerY - ctx.gameAreaHeight
+  end
+end
+
+
 function Spaceship:processKeyPressed(keyPressed, mainTimer)
+  rebalanceCenterCoordinates(self)
+
   if (sskb.kGo == keyPressed) then
     -- log_m.trace("will do move ")
     startMove(self, mainTimer)

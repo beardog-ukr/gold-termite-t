@@ -19,33 +19,24 @@ AsteroidsGame = HumpClass{
   spaceship = nil,
   asteroids = {} ,
   mainTimer = nil,
+  asteroidsUpdateTimeAcc = 0,
 }
 
 function AsteroidsGame:init()
   self.mainTimer = require "../thirdparty/hump.timer"
-  self.spaceship = Spaceship(80, 520)
+  self.spaceship = Spaceship(480, 50)
 
-  local asteroidsPositions = { {x=100, y=200},
-                               {x= 80, y=400}}
-  for i=1,#asteroidsPositions do
-    self.asteroids[i] = Asteroid(asteroidsPositions[i].x, asteroidsPositions[i].y)
+  local asteroidPositions = { {x=100, y=80, a=-math.pi/2},
+                              {x= 80, y=500, a=math.pi/4}}
+  for i=1,#asteroidPositions do
+    self.asteroids[i] = Asteroid(asteroidPositions[i])
+    self.asteroids[i]:restartMoving(self.mainTimer)
   end
+
+
 end
 
 -- ===========================================================================
-
-function AsteroidsGame:processKeyPressed(key)
-  self.spaceship:processKeyPressed(key, self.mainTimer)
-end
-
-function AsteroidsGame:setGameArea(x,y, width, height)
-  self.spaceship:setGameArea(ds.largeFrameSize, ds.largeFrameSize,
-                             ds.gameAreaWidth, ds.gameAreaHeight)
-  for i = 1, #self.asteroids do
-    self.asteroids[i]:setGameArea(ds.largeFrameSize, ds.largeFrameSize,
-                                  ds.gameAreaWidth, ds.gameAreaHeight)
-  end
-end
 
 function AsteroidsGame:drawSelf()
   local cww = love.graphics.getWidth(); -- current window width
@@ -87,6 +78,27 @@ function AsteroidsGame:drawSelf()
                           ds.smallFrameSize, ds.gameAreaHeight)
 end
 
+function AsteroidsGame:processKeyPressed(key)
+  self.spaceship:processKeyPressed(key, self.mainTimer)
+end
+
 function AsteroidsGame:processUpdate(diffTime)
   self.mainTimer.update(diffTime)
+  self.asteroidsUpdateTimeAcc = self.asteroidsUpdateTimeAcc + diffTime
+  if (self.asteroidsUpdateTimeAcc > 3.5) then
+    -- log_m.trace("restarting asteroids")
+    for i=1,#self.asteroids do
+      self.asteroids[i]:restartMoving(self.mainTimer)
+      self.asteroidsUpdateTimeAcc = 0
+    end
+  end
+end
+
+function AsteroidsGame:setGameArea(x,y, width, height)
+  self.spaceship:setGameArea(ds.largeFrameSize, ds.largeFrameSize,
+                             ds.gameAreaWidth, ds.gameAreaHeight)
+  for i = 1, #self.asteroids do
+    self.asteroids[i]:setGameArea(ds.largeFrameSize, ds.largeFrameSize,
+                                  ds.gameAreaWidth, ds.gameAreaHeight)
+  end
 end

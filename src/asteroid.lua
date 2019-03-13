@@ -13,10 +13,6 @@ asdef_m.getSpaceshipDefaults(asdef)
 -- ===========================================================================
 
 Asteroid = Class{
-  init = function(self, x,y)
-    self.centerX = x
-    self.centerY = y
-  end,
   angle = (math.pi/2) ,
   gameAreaX = 0          ,
   gameAreaY = 0          ,
@@ -25,6 +21,12 @@ Asteroid = Class{
   size = 30              ,
   movingTweenHandle = nil ,
 }
+
+function Asteroid:init(params)
+  self.centerX = params.x
+  self.centerY = params.y
+  self.angle = params.a
+end
 
 -- ============================================================================
 
@@ -62,6 +64,50 @@ function Asteroid:drawSelf()
     local ymod = self.gameAreaY - self.centerY - (self.gameAreaHeight - self.centerY)
     drawAsteroid(self, self.gameAreaX, ymod)
   end
+
+  if ((self.centerY) < (appdef.maxObjectSize/2)) then
+    -- log_m.trace("crossing north border, redraw at south")
+    local ymod = self.gameAreaY + self.gameAreaHeight
+    drawAsteroid(self, self.gameAreaX, ymod)
+  end
+end
+
+-- ============================================================================
+
+local function rebalanceCenterCoordinates(ctx)
+  if (ctx.centerX < 0) then
+    ctx.centerX = ctx.gameAreaWidth + ctx.centerX
+  end
+  if (ctx.centerY < 0) then
+    log_m.trace("rebalanced after north Y")
+    ctx.centerY = ctx.gameAreaHeight + ctx.centerY
+  end
+
+  if (ctx.centerX > ctx.gameAreaWidth) then
+    ctx.centerX = ctx.centerX - ctx.gameAreaWidth
+  end
+  if (ctx.centerY > ctx.gameAreaHeight) then
+    log_m.trace("rebalanced after south Y")
+    ctx.centerY = ctx.centerY - ctx.gameAreaHeight 
+  end
+end
+
+function Asteroid:restartMoving(mainTimer)
+
+  rebalanceCenterCoordinates(self)
+
+  local acm = (asdef.moveLeapLength * self.size)
+  local acxm = math.cos(self.angle) * acm -- asteroid's center X modifier
+  local acym = math.sin(self.angle) * acm -- asteroid's center Y modifier
+  local newCX = self.centerX + acxm;
+  local newCY = self.centerY + acym;
+
+  local newTimer = mainTimer.tween(asdef.speedInterval, self,
+                                   {centerX = newCX, centerY = newCY})
+  if (self.movingTweenHandle) then
+    mainTimer.cancel(self.movingTweenHandle)
+  end
+  self.movingTweenHandle = newTimer
 end
 
 -- ============================================================================
