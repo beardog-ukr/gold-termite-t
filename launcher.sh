@@ -12,7 +12,7 @@ function print_help_message {
   echo "Options:"
   echo "-h or --help  :   print this message and exit"
   echo "-u            :   unpack thirdpaty libs from archives"
-  echo "-s or --seed  :   will be used later for debugging purposes"
+  echo "-s or --seed  :   will be used later for debugging purposes (not available for now)"
 }
 
 function unpack_thirdparty {
