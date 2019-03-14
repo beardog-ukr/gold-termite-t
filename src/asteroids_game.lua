@@ -23,9 +23,9 @@ AsteroidsGame = HumpClass{
 
 function AsteroidsGame:init()
   self.mainTimer = require "../thirdparty/hump.timer"
-  self.spaceship = Spaceship(750, 70, 0)
+  self.spaceship = Spaceship(750, 200, -math.pi/2)
 
-  local asteroidPositions = { {x=150, y=100, a=-math.pi},
+  local asteroidPositions = { {x=700, y=100, a=0},
                               {x= 80, y=550, a=math.pi/2}}
   for i=1,#asteroidPositions do
     self.asteroids[i] = Asteroid(asteroidPositions[i])
@@ -102,6 +102,8 @@ local function areCirclesIntersecting(aX, aY, aRadius, bX, bY, bRadius)
   return (aX - bX)^2 + (aY - bY)^2 <= (aRadius + bRadius)^2
 end
 
+-- ===========================================================================
+
 local function checkCrashConflicts(ctx, itemX, y, size)
   local result = false
   for i=1,#ctx.asteroids do
@@ -176,6 +178,53 @@ local function checkAllCrashConflicts(ctx)
   return result
 end
 
+-- ===========================================================================
+
+local function checkKillingsForRocket(ctx, rocketInfo)
+  local killed = false
+  local killedIdx = 0
+  for ai=1,#ctx.asteroids do    
+    killed = areCirclesIntersecting(ctx.asteroids[ai].centerX,
+                                    ctx.asteroids[ai].centerY,
+                                    ctx.asteroids[ai].size,
+                                    rocketInfo.centerX, rocketInfo.centerY,
+                                    5)
+    if (killed == true) then      
+      ctx.mainTimer.cancel(ctx.asteroids[ai].movingTweenHandle)
+      ctx.asteroids[ai] = nil
+      killedIdx = ai
+      log_m.trace("Killed asteroid " .. killedIdx)
+      break
+    end
+  end
+
+  if(killed == true) then
+    table.remove(ctx.asteroids, killedIdx)
+  end    
+
+  return killed
+end
+
+local function checkAllKillings(ctx)
+  local newRockets = {}
+  local newRocketsIdx = 1
+  for ri=1,#ctx.rockets do
+    local killed = checkKillingsForRocket(ctx, ctx.rockets[ri])
+    if (killed == true) then
+      ctx.mainTimer.cancel(ctx.rockets[ri].movingTweenHandle)
+      ctx.rockets[ri] = nil
+    else
+      newRockets[newRocketsIdx] = ctx.rockets[ri]
+      newRocketsIdx = newRocketsIdx +1
+    end
+  end
+
+  ctx.rockets = newRockets
+
+end
+
+-- ===========================================================================
+
 function AsteroidsGame:processUpdate(diffTime)
   if (self.gameFinished == true) then
     return;
@@ -192,6 +241,7 @@ function AsteroidsGame:processUpdate(diffTime)
 
     local newRockets = {}
     local newRocketsIdx = 1;
+    
     for i=1,#self.rockets do
       if (self.rockets[i].active < 0.05) then
         self.mainTimer.cancel(self.rockets[i].movingTweenHandle)
@@ -204,6 +254,8 @@ function AsteroidsGame:processUpdate(diffTime)
     end
     self.rockets = newRockets
   end
+
+  checkAllKillings(self)
 
   self.gameFinished = checkAllCrashConflicts(self)
   if (self.gameFinished == true) then
