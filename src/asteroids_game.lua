@@ -26,7 +26,10 @@ function AsteroidsGame:init()
   self.spaceship = Spaceship(750, 200, -math.pi/2)
 
   local asteroidPositions = { {x=700, y=100, a=0},
-                              {x= 80, y=550, a=math.pi/2}}
+                              {x= 80, y=550, a=math.pi/2},
+                              {x= 10, y=150, a=math.pi/4},
+                              {x= 380, y=550, a=math.pi/9}
+                            }
   for i=1,#asteroidPositions do
     self.asteroids[i] = Asteroid(asteroidPositions[i])
     self.asteroids[i]:restartMoving(self.mainTimer)
@@ -191,14 +194,28 @@ local function checkKillingsForRocket(ctx, rocketInfo)
                                     5)
     if (killed == true) then      
       ctx.mainTimer.cancel(ctx.asteroids[ai].movingTweenHandle)
-      ctx.asteroids[ai] = nil
-      killedIdx = ai
-      log_m.trace("Killed asteroid " .. killedIdx)
+
+      if (ctx.asteroids[ai].type == 2) then
+        local fakeBase = {x=700, y=100, a=0}
+        local childA = Asteroid(fakeBase)
+        local childB = Asteroid(fakeBase)
+        ctx.asteroids[ai]:setupCloneA(childA)
+        ctx.asteroids[ai]:setupCloneB(childB)
+        childA:restartMoving(ctx.mainTimer)
+        childB:restartMoving(ctx.mainTimer)
+
+        ctx.asteroids[ai] = childA
+        ctx.asteroids[#ctx.asteroids +1] = childB
+      else
+        ctx.asteroids[ai] = nil
+        killedIdx = ai
+      end
+
       break
     end
   end
 
-  if(killed == true) then
+  if ((killed == true) and (killedIdx>0)) then
     table.remove(ctx.asteroids, killedIdx)
   end    
 

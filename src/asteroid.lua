@@ -20,6 +20,7 @@ Asteroid = Class{
   gameAreaHeight = 0     ,
   size = 30              ,
   movingTweenHandle = nil ,
+  type = 2 ,
 }
 
 function Asteroid:init(params)
@@ -118,4 +119,35 @@ function Asteroid:setGameArea(x,y, width, height)
 
   self.gameAreaWidth = width
   self.gameAreaHeight = height
+end
+
+-- ============================================================================
+
+local function setupCloneCommon(ctx, clone)
+  clone.type = 1 
+
+  clone.gameAreaX = ctx.gameAreaX
+  clone.gameAreaY = ctx.gameAreaY 
+
+  clone.gameAreaWidth = ctx.gameAreaWidth
+  clone.gameAreaHeight = ctx.gameAreaHeight
+
+  clone.size = ctx.size/2
+end
+
+function Asteroid:setupCloneA(clone)
+  setupCloneCommon(self, clone)
+
+  clone.angle = self.angle - math.pi/2
+  clone.centerX = self.centerX + (math.cos(self.angle) * self.size *0.5)
+  clone.centerY = self.centerY + (math.sin(self.angle) * self.size *0.5)
+end
+
+function Asteroid:setupCloneB(clone)
+  setupCloneCommon(self, clone)
+
+  clone.angle = self.angle + math.pi/2
+  local bAngle = self.angle - math.pi
+  clone.centerX = self.centerX + (math.cos(bAngle) * self.size *0.5)
+  clone.centerY = self.centerY + (math.sin(bAngle) * self.size *0.5)
 end
