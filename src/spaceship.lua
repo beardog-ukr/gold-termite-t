@@ -21,11 +21,12 @@ sskb.kRight = "d"
 -- ===========================================================================
 
 Spaceship = Class{
-  init = function(self, x,y)
+  init = function(self, x,y, a)
     self.centerX = x
     self.centerY = y
+    self.angle = a
   end,
-  angle = (math.pi/2) ,
+  angle = 0 ,
   gameAreaX = 0          ,
   gameAreaY = 0          ,
   gameAreaWidth = 0      ,
@@ -136,7 +137,7 @@ function Spaceship:drawSelf()
   end
 
   if ((self.centerY) < (appdef.maxObjectSize/2)) then
-    -- log_m.trace("need more draw to up")
+    -- log_m.trace("spaceship crosses north border, redraw at south")
     local ymod = self.gameAreaY + self.gameAreaHeight
     drawSpaceShip(self, self.gameAreaX, ymod)
   end
